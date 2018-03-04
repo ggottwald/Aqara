@@ -1,0 +1,21 @@
+{
+  "name": "ggottwald/aqara",
+  "description": "Receive Xiaomi Gateway events",
+  "type": "library",
+  "require": {
+    "php": ">=7.0",
+    "clue/multicast-react": "^1.0"
+  },
+  "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
+  "authors": [
+    {
+      "name": "Götz Gottwald",
+      "email": "goetz.gottwald@gmx.net"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Aqara\\": "src/"
+    }
+  }
+}
