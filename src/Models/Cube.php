@@ -12,6 +12,12 @@ namespace Aqara\Models;
  */
 class Cube extends Subdevice
 {
+    public function __construct(array $attributes = [])
+    {
+        $this->type = 'cube';
+        parent::__construct($attributes);
+    }
+
     /**
      * @param array $state
      */
@@ -20,7 +26,7 @@ class Cube extends Subdevice
         if (!is_array($state)) {
             return;
         }
-        
+
         if (isset($state['rotate'])) {
             $this->status = 'rotate';
             $this->rotateDegrees = $state['rotate'];
