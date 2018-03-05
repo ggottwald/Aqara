@@ -17,11 +17,15 @@ class Cube extends Subdevice
      */
     public function handleState($state)
     {
+        if (!is_array($state)) {
+            return;
+        }
+        
         if (isset($state['rotate'])) {
             $this->status = 'rotate';
             $this->rotateDegrees = $state['rotate'];
         } else {
-            $this->status = $state['status'];
+            $this->status = $state['status'] ?? null;
             $this->rotateDegrees = null;
         }
 
