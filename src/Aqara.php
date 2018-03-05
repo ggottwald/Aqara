@@ -91,7 +91,8 @@ class Aqara extends EventEmitter
 
         if (!$handled) {
             foreach ($this->gatewayList as $gateway) {
-                if ($gateway->handleMessage($response)) {
+                if ($gateway instanceof Gateway
+                    && $gateway->handleMessage($response)) {
                     break;
                 }
             }
