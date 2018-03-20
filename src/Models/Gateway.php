@@ -79,7 +79,7 @@ class Gateway extends Response implements EventEmitterInterface
                             break;
                         case 'motion':
                         case 'sensor_motion.aq2':
-                            // TODO: motion
+                            $subDevice = new Motion(['sid' => $response->sid]);
                             break;
                         case 'sensor_ht':
                         case 'weather.v1':
