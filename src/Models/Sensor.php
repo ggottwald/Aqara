@@ -39,7 +39,7 @@ class Sensor extends Subdevice
         }
 
         if (isset($state['pressure'])) {
-            $this->humidity = $state['pressure'] / 1000;
+            $this->pressure = $state['pressure'] / 1000;
         }
 
         $this->emit('update');
