@@ -83,7 +83,7 @@ class Gateway extends Response implements EventEmitterInterface
                             break;
                         case 'sensor_ht':
                         case 'weather.v1':
-                            // TODO: sensor
+                            $subDevice = new Sensor(['sid' => $response->sid]);
                             break;
                         case 'sensor_wleak.aq1':
                             // TODO: leak
@@ -97,9 +97,9 @@ class Gateway extends Response implements EventEmitterInterface
 
                     if (isset($subDevice)) {
                         $subDevice->handleState($state);
-                        $subDevices = $this->subDevices;
+                        $subDevices                 = $this->subDevices;
                         $subDevices[$response->sid] = $subDevice;
-                        $this->subDevices = $subDevices;
+                        $this->subDevices           = $subDevices;
                         $this->emit('subdevice', [$subDevice]);
                     }
                 }
@@ -142,7 +142,7 @@ class Gateway extends Response implements EventEmitterInterface
 
             if (strlen($hexValue) >= 7) {
                 $this->brightness = strrev(substr(strrev($hexValue), 6));
-                $this->rgb = strrev(substr(strrev($hexValue), 0, 6));
+                $this->rgb        = strrev(substr(strrev($hexValue), 0, 6));
                 $this->emit('lightState', ['rgb' => $this->rgb, 'brightness' => $this->brightness]);
             }
         }
