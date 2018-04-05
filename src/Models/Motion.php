@@ -28,6 +28,8 @@ class Motion extends Subdevice
             return;
         }
 
+        parent::handleState($state);
+
         $this->lux = $state['lux'] ?? null;
 
         if (isset($state['status']) || isset($state['no_motion'])) {

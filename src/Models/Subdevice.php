@@ -21,6 +21,8 @@ abstract class Subdevice extends DataModel
      */
     public function handleState($state)
     {
-
+        if (isset($state['voltage'])) {
+            $this->voltage = $state['voltage'];
+        }
     }
 }
