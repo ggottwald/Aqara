@@ -71,7 +71,7 @@ class Gateway extends Response implements EventEmitterInterface
                     switch ($response->model) {
                         case 'magnet':
                         case 'sensor_magnet.aq2':
-                            // TODO: magnet
+                            $subDevice = new Magnet(['sid' => $response->sid]);
                             break;
                         case 'switch':
                         case 'sensor_switch.aq2':
