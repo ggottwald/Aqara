@@ -86,7 +86,7 @@ class Gateway extends Response implements EventEmitterInterface
                             $subDevice = new Sensor(['sid' => $response->sid]);
                             break;
                         case 'sensor_wleak.aq1':
-                            // TODO: leak
+                            $subDevice = new Leak(['sid' => $response->sid]);
                             break;
                         case 'cube':
                             $subDevice = new Cube(['sid' => $response->sid]);
