@@ -75,7 +75,7 @@ class Gateway extends Response implements EventEmitterInterface
                             break;
                         case 'switch':
                         case 'sensor_switch.aq2':
-                            // TODO: switch
+                            $subDevice = new SwitchDevice(['sid' => $response->sid]);
                             break;
                         case 'motion':
                         case 'sensor_motion.aq2':
