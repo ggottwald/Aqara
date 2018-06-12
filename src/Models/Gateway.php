@@ -106,7 +106,7 @@ class Gateway extends Response implements EventEmitterInterface
                 break;
             case 'heartbeat':
                 if ($response->sid == $this->sid) {
-                    // TODO: refresh key/token
+                    $this->emit('heartbeat');
                 }
                 break;
             case 'report':
