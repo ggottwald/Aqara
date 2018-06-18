@@ -1,5 +1,6 @@
 # Aqara
-Get Xiaomi Smart Home device status of gateway and sub-devices. Actually only magic cube is supported.
+Get Xiaomi Smart Home device status of gateway and sub-devices.
+Supports magic cube, water leak sensor, door/window sensor, motion sensor and mini switch.
 
 This package was inspired by the node package https://github.com/marvinroger/node-lumi-aqara
 
