@@ -108,4 +108,9 @@ class Aqara extends EventEmitter
     {
         $this->loop->tick();
     }
+
+    public function close()
+    {
+        $this->socket->close();
+    }
 }
