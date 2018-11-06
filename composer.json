@@ -4,7 +4,10 @@
   "type": "library",
   "require": {
     "php": ">=7.0",
-    "clue/multicast-react": "^1.0"
+    "ext-sockets": "*",
+    "ext-json": "*",
+    "react/event-loop": "^1.0",
+    "react/datagram": "^1.4"
   },
   "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
   "authors": [

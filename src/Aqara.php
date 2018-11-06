@@ -4,12 +4,13 @@ namespace Aqara;
 
 use Aqara\Models\Gateway;
 use Aqara\Models\Response;
-use Clue\React\Multicast\Factory;
 use Evenement\EventEmitter;
+use React\Datagram\Socket;
 use React\EventLoop\ExtEventLoop;
 use React\EventLoop\LibEventLoop;
 use React\EventLoop\LibEvLoop;
 use React\EventLoop\StreamSelectLoop;
+use RuntimeException;
 
 class Aqara extends EventEmitter
 {
@@ -29,19 +30,54 @@ class Aqara extends EventEmitter
      */
     protected $loop;
 
+    /**
+     * @var Socket
+     */
     protected $socket;
 
     public function __construct()
     {
         $this->loop = \React\EventLoop\Factory::create();
-        $factory = new Factory($this->loop);
-        $this->socket = $factory->createReceiver(static::MULTICAST_ADDRESS . ':' . static::SERVER_PORT);
+
+        $this->createReceiver();
 
         $this->socket->on('message', function ($data) {
             $this->handleMessage($data);
         });
 
         $this->triggerWhois();
+    }
+
+    protected function createReceiver()
+    {
+        $stream = @stream_socket_server('udp://0.0.0.0:' . static::SERVER_PORT, $errno, $errstr, STREAM_SERVER_BIND);
+        if ($stream === false) {
+            throw new RuntimeException('Unable to create receiving socket: ' . $errstr, $errno);
+        }
+
+        $socket = socket_import_stream($stream);
+        if ($stream === false) {
+            throw new RuntimeException('Unable to access underlying socket resource');
+        }
+
+        // allow multiple processes to bind to the same address
+        $ret = socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);
+        if ($ret === false) {
+            throw new RuntimeException('Unable to enable SO_REUSEADDR');
+        }
+
+        // join multicast group and bind to port
+        $ret = socket_set_option(
+            $socket,
+            IPPROTO_IP,
+            MCAST_JOIN_GROUP,
+            ['group' => static::MULTICAST_ADDRESS, 'interface' => 0]
+        );
+        if ($ret === false) {
+            throw new RuntimeException('Unable to join multicast group');
+        }
+
+        $this->socket = new Socket($this->loop, $stream);
     }
 
     protected function triggerWhois()
@@ -64,7 +100,7 @@ class Aqara extends EventEmitter
 
         switch ($response->cmd) {
             case 'heartbeat':
-                if (!isset($this->gatewayList[$response->sid])) {
+                if ($parsed['model'] === 'gateway' && !isset($this->gatewayList[$response->sid])) {
                     $handled = true;
                     $this->triggerWhois();
                 }
@@ -111,6 +147,7 @@ class Aqara extends EventEmitter
 
     public function close()
     {
+        $this->loop->stop();
         $this->socket->close();
     }
 }
