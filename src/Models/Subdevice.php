@@ -10,6 +10,7 @@ use Evenement\EventEmitterTrait;
  * @package Aqara\Models
  * @property string $sid
  * @property string $type
+ * @property string $model
  * @property int    $voltage
  */
 abstract class Subdevice extends DataModel
