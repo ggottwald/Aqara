@@ -80,6 +80,7 @@ class Gateway extends Response implements EventEmitterInterface
                             break;
                         case 'switch':
                         case 'sensor_switch.aq2':
+                        case '86sw1':
                             $subDevice = new SwitchDevice(
                                 [
                                     'sid'   => $response->sid,
