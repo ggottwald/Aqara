@@ -92,7 +92,14 @@ class Gateway extends Response implements EventEmitterInterface
                             $subDevice = new Cube(['sid' => $response->sid]);
                             break;
                         default:
-                            return false;
+                            $subDevice = new Class(['sid' => $response->sid]) extends Subdevice
+                            {
+                                public function __construct(array $attributes = [])
+                                {
+                                    $this->type = 'unknown';
+                                    parent::__construct($attributes);
+                                }
+                            };
                     }
 
                     if (isset($subDevice)) {
