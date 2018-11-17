@@ -71,28 +71,63 @@ class Gateway extends Response implements EventEmitterInterface
                     switch ($response->model) {
                         case 'magnet':
                         case 'sensor_magnet.aq2':
-                            $subDevice = new Magnet(['sid' => $response->sid]);
+                            $subDevice = new Magnet(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
                             break;
                         case 'switch':
                         case 'sensor_switch.aq2':
-                            $subDevice = new SwitchDevice(['sid' => $response->sid]);
+                            $subDevice = new SwitchDevice(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
                             break;
                         case 'motion':
                         case 'sensor_motion.aq2':
-                            $subDevice = new Motion(['sid' => $response->sid]);
+                            $subDevice = new Motion(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
                             break;
                         case 'sensor_ht':
                         case 'weather.v1':
-                            $subDevice = new Sensor(['sid' => $response->sid]);
+                            $subDevice = new Sensor(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
                             break;
                         case 'sensor_wleak.aq1':
-                            $subDevice = new Leak(['sid' => $response->sid]);
+                            $subDevice = new Leak(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
                             break;
                         case 'cube':
-                            $subDevice = new Cube(['sid' => $response->sid]);
+                            $subDevice = new Cube(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
                             break;
                         default:
-                            $subDevice = new Class(['sid' => $response->sid]) extends Subdevice
+                            $subDevice = new Class(
+                                [
+                                    'sid'   => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            ) extends Subdevice
                             {
                                 public function __construct(array $attributes = [])
                                 {
