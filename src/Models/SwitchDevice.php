@@ -38,23 +38,23 @@ class SwitchDevice extends Subdevice
                 static::LONG_CLICK_PRESS,
                 static::LONG_CLICK_RELEASE,
             ])) {
-            $this->emit($state['state']);
-        } elseif (isset($state['state']['channel_0'])
-            && in_array($state['state']['channel_0'], [
+            $this->emit($state['status']);
+        } elseif (isset($state['channel_0'])
+            && in_array($state['channel_0'], [
                 static::CLICK,
                 static::DOUBLE_CLICK,
                 static::LONG_CLICK_PRESS,
                 static::LONG_CLICK_RELEASE,
             ])) {
-            $this->emit($state['state'], ['channel' => 0]);
-        } elseif (isset($state['state']['channel_1'])
-            && in_array($state['state']['channel_1'], [
+            $this->emit($state['channel_0'], ['channel' => 0]);
+        } elseif (isset($state['channel_1'])
+            && in_array($state['channel_1'], [
                 static::CLICK,
                 static::DOUBLE_CLICK,
                 static::LONG_CLICK_PRESS,
                 static::LONG_CLICK_RELEASE,
             ])) {
-            $this->emit($state['state'], ['channel' => 1]);
+            $this->emit($state['channel_1'], ['channel' => 1]);
         }
     }
 }
