@@ -8,8 +8,8 @@ namespace Aqara\Models;
  * @package Aqara\Models
  *
  * @property bool $motion
- * @property int  $noMotion
- * @property int  $lux
+ * @property int $noMotion
+ * @property int $lux
  */
 class Motion extends Subdevice
 {
@@ -30,7 +30,9 @@ class Motion extends Subdevice
 
         parent::handleState($state);
 
-        $this->lux = $state['lux'] ?? null;
+        if (isset($state['lux'])) {
+            $this->lux = $state['lux'];
+        }
 
         if (isset($state['status']) || isset($state['no_motion'])) {
             $this->motion = isset($state['status']) && $state['status'] === 'motion';
