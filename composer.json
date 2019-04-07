@@ -6,7 +6,7 @@
     "php": ">=7.0",
     "ext-sockets": "*",
     "ext-json": "*",
-    "react/event-loop": "^1.1",
+    "react/event-loop": "^0.4",
     "react/datagram": "^1.4"
   },
   "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
