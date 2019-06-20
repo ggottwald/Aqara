@@ -9,9 +9,10 @@ namespace Aqara\Models;
  */
 class SwitchDevice extends Subdevice
 {
-    const CLICK              = 'click';
-    const DOUBLE_CLICK       = 'double_click';
-    const LONG_CLICK_PRESS   = 'long_click_press';
+    const CLICK = 'click';
+    const DOUBLE_CLICK = 'double_click';
+    const LONG_CLICK = 'long_click';
+    const LONG_CLICK_PRESS = 'long_click_press';
     const LONG_CLICK_RELEASE = 'long_click_release';
 
     public function __construct(array $attributes = [])
@@ -35,6 +36,7 @@ class SwitchDevice extends Subdevice
             && in_array($state['status'], [
                 static::CLICK,
                 static::DOUBLE_CLICK,
+                static::LONG_CLICK,
                 static::LONG_CLICK_PRESS,
                 static::LONG_CLICK_RELEASE,
             ])) {
@@ -43,6 +45,7 @@ class SwitchDevice extends Subdevice
             && in_array($state['channel_0'], [
                 static::CLICK,
                 static::DOUBLE_CLICK,
+                static::LONG_CLICK,
                 static::LONG_CLICK_PRESS,
                 static::LONG_CLICK_RELEASE,
             ])) {
@@ -51,6 +54,7 @@ class SwitchDevice extends Subdevice
             && in_array($state['channel_1'], [
                 static::CLICK,
                 static::DOUBLE_CLICK,
+                static::LONG_CLICK,
                 static::LONG_CLICK_PRESS,
                 static::LONG_CLICK_RELEASE,
             ])) {
