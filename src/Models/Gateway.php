@@ -125,6 +125,14 @@ class Gateway extends Response implements EventEmitterInterface
                                 ]
                             );
                             break;
+                        case 'smoke':
+                            $subDevice = new Smoke(
+                                [
+                                    'sid' => $response->sid,
+                                    'model' => $response->model,
+                                ]
+                            );
+                            break;
                         default:
                             $subDevice = new Class(
                                 [
