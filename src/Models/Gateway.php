@@ -10,13 +10,13 @@ use Evenement\EventEmitterTrait;
  *
  * @package Aqara\Models
  *
- * @property string $ip
- * @property int $port
- * @property bool $ready
- * @property string $rgb
- * @property string $brightness
+ * @property string      $ip
+ * @property int         $port
+ * @property bool        $ready
+ * @property string      $rgb
+ * @property string      $brightness
  * @property Subdevice[] $subDevices
- * @property \Closure $sendUnicast
+ * @property \Closure    $sendUnicast
  *
  * @method sendUnicast(string $payload)
  */
@@ -73,7 +73,7 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'sensor_magnet.aq2':
                             $subDevice = new Magnet(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -82,11 +82,12 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'sensor_switch.aq2':
                         case '86sw1':
                         case '86sw2':
+                        case 'remote.b1acn01';
                         case 'remote.b186acn01':
                         case 'remote.b286acn01':
                             $subDevice = new SwitchDevice(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -95,7 +96,7 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'sensor_motion.aq2':
                             $subDevice = new Motion(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -104,7 +105,7 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'weather.v1':
                             $subDevice = new Sensor(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -112,7 +113,7 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'sensor_wleak.aq1':
                             $subDevice = new Leak(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -120,7 +121,7 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'cube':
                             $subDevice = new Cube(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -128,7 +129,7 @@ class Gateway extends Response implements EventEmitterInterface
                         case 'smoke':
                             $subDevice = new Smoke(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             );
@@ -136,7 +137,7 @@ class Gateway extends Response implements EventEmitterInterface
                         default:
                             $subDevice = new Class(
                                 [
-                                    'sid' => $response->sid,
+                                    'sid'   => $response->sid,
                                     'model' => $response->model,
                                 ]
                             ) extends Subdevice
@@ -151,9 +152,9 @@ class Gateway extends Response implements EventEmitterInterface
 
                     if (isset($subDevice)) {
                         $subDevice->handleState($state);
-                        $subDevices = $this->subDevices;
+                        $subDevices                 = $this->subDevices;
                         $subDevices[$response->sid] = $subDevice;
-                        $this->subDevices = $subDevices;
+                        $this->subDevices           = $subDevices;
                         $this->emit('subdevice', [$subDevice]);
                     }
                 }
@@ -196,7 +197,7 @@ class Gateway extends Response implements EventEmitterInterface
 
             if (strlen($hexValue) >= 7) {
                 $this->brightness = strrev(substr(strrev($hexValue), 6));
-                $this->rgb = strrev(substr(strrev($hexValue), 0, 6));
+                $this->rgb        = strrev(substr(strrev($hexValue), 0, 6));
                 $this->emit('lightState', ['rgb' => $this->rgb, 'brightness' => $this->brightness]);
             }
         }
