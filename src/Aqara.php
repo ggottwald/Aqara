@@ -6,10 +6,8 @@ use Aqara\Models\Gateway;
 use Aqara\Models\Response;
 use Evenement\EventEmitter;
 use React\Datagram\Socket;
-use React\EventLoop\ExtEventLoop;
-use React\EventLoop\ExtLibevLoop;
 use React\EventLoop\Factory;
-use React\EventLoop\StreamSelectLoop;
+use React\EventLoop\LoopInterface;
 use RuntimeException;
 
 class Aqara extends EventEmitter
@@ -26,7 +24,7 @@ class Aqara extends EventEmitter
     protected $gatewayList = [];
 
     /**
-     * @var ExtEventLoop|ExtEventLoop|ExtLibevLoop|StreamSelectLoop
+     * @var LoopInterface
      */
     protected $loop;
 
@@ -145,10 +143,11 @@ class Aqara extends EventEmitter
         $this->loop->futureTick(function () {
             $this->loop->stop();
         });
+        $this->loop->run();
     }
 
     /**
-     * @return ExtEventLoop|ExtLibevLoop|\React\EventLoop\LoopInterface|StreamSelectLoop
+     * @return LoopInterface
      */
     public function getLoop()
     {
