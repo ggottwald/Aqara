@@ -33,9 +33,14 @@ class Aqara extends EventEmitter
      */
     protected $socket;
 
-    public function __construct()
+    /**
+     * Aqara constructor.
+     *
+     * @param LoopInterface $loop
+     */
+    public function __construct($loop = null)
     {
-        $this->loop = Factory::create();
+        $this->loop = $loop instanceof LoopInterface ? $loop : Factory::create();
 
         $this->createReceiver();
 
@@ -154,17 +159,8 @@ class Aqara extends EventEmitter
         return $this->loop;
     }
 
-    /**
-     * @param callable $listener
-     */
-    public function futureTick($listener)
-    {
-        $this->loop->futureTick($listener);
-    }
-
     public function close()
     {
-        $this->loop->stop();
         $this->socket->close();
     }
 }
