@@ -142,9 +142,17 @@ class Aqara extends EventEmitter
 
     public function tick()
     {
-        $this->futureTick(function () {
-
+        $this->loop->futureTick(function () {
+            $this->loop->stop();
         });
+    }
+
+    /**
+     * @return ExtEventLoop|ExtLibevLoop|\React\EventLoop\LoopInterface|StreamSelectLoop
+     */
+    public function getLoop()
+    {
+        return $this->loop;
     }
 
     /**
