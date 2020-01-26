@@ -7,8 +7,8 @@ use Aqara\Models\Response;
 use Evenement\EventEmitter;
 use React\Datagram\Socket;
 use React\EventLoop\ExtEventLoop;
-use React\EventLoop\LibEventLoop;
-use React\EventLoop\LibEvLoop;
+use React\EventLoop\ExtLibevLoop;
+use React\EventLoop\Factory;
 use React\EventLoop\StreamSelectLoop;
 use RuntimeException;
 
@@ -26,7 +26,7 @@ class Aqara extends EventEmitter
     protected $gatewayList = [];
 
     /**
-     * @var ExtEventLoop|LibEventLoop|LibEvLoop|StreamSelectLoop
+     * @var ExtEventLoop|ExtEventLoop|ExtLibevLoop|StreamSelectLoop
      */
     protected $loop;
 
@@ -37,7 +37,7 @@ class Aqara extends EventEmitter
 
     public function __construct()
     {
-        $this->loop = \React\EventLoop\Factory::create();
+        $this->loop = Factory::create();
 
         $this->createReceiver();
 
@@ -142,7 +142,17 @@ class Aqara extends EventEmitter
 
     public function tick()
     {
-        $this->loop->tick();
+        $this->futureTick(function () {
+
+        });
+    }
+
+    /**
+     * @param callable $listener
+     */
+    public function futureTick($listener)
+    {
+        $this->loop->futureTick($listener);
     }
 
     public function close()
