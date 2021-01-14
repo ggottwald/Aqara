@@ -41,12 +41,19 @@ class Aqara extends EventEmitter
     public function __construct($loop = null)
     {
         $this->loop = $loop instanceof LoopInterface ? $loop : Factory::create();
+        $this->initReceiver();
+    }
 
+    protected function initReceiver()
+    {
         $this->createReceiver();
 
-        $this->socket->on('message', function ($data) {
-            $this->handleMessage($data);
-        });
+        $this->socket->on(
+            'message',
+            function ($data) {
+                $this->handleMessage($data);
+            }
+        );
 
         $this->triggerWhois();
     }
@@ -91,11 +98,9 @@ class Aqara extends EventEmitter
 
     protected function handleMessage($message)
     {
-        $handled = false;
-
         $parsed = @json_decode($message, true);
 
-        if (is_null($parsed) || !isset($parsed['cmd'])) {
+        if (empty($parsed['cmd'])) {
             return;
         }
 
@@ -103,39 +108,76 @@ class Aqara extends EventEmitter
 
         switch ($response->cmd) {
             case 'heartbeat':
-                if ($parsed['model'] === 'gateway' && !isset($this->gatewayList[$response->sid])) {
-                    $handled = true;
+                if ($response->model === 'gateway'
+                    && !empty($response->sid)
+                    && !isset($this->gatewayList[$response->sid])) {
+                    $this->createGateway($response);
                     $this->triggerWhois();
                 }
                 break;
 
             case 'iam':
-                $handled = true;
                 if (isset($this->gatewayList[$response->sid])) {
-                    break;
+                    return;
                 }
-                $parsed['sendUnicast'] = function ($payload) use ($response) {
-                    $this->socket->send($payload, $response->ip . ':' . static::SERVER_PORT);
-                };
-
-                $gateway = new Gateway($parsed);
-                $gateway->on('offline', function () use ($response) {
-                    /** @var Response $response */
-                    unset($this->gatewayList[$response->sid]);
-                });
-                $this->gatewayList[$response->sid] = $gateway;
-                $this->emit('gateway', [$gateway]);
-                break;
+                $this->createGateway($response);
+                return;
         }
 
-        if (!$handled) {
-            foreach ($this->gatewayList as $gateway) {
-                if ($gateway instanceof Gateway
-                    && $gateway->handleMessage($response)) {
-                    break;
-                }
+        foreach ($this->gatewayList as $gateway) {
+            if ($gateway instanceof Gateway
+                && $gateway->handleMessage($response)) {
+                break;
             }
         }
+    }
+
+    /**
+     * @param Response $response
+     */
+    protected function createGateway($response)
+    {
+        if (empty($response->sid)) {
+            // missing sid
+            return;
+        }
+
+        if (!empty($response->ip)) {
+            $ip = $response->ip;
+        } elseif (!empty($response->data)) {
+            $parsed = @json_decode($response->data, true);
+            if (empty($parsed['ip'])) {
+                // missing ip
+                return;
+            }
+            $ip = $parsed['ip'];
+        } else {
+            // missing ip
+            return;
+        }
+
+        $sid = $response->sid;
+
+        $response->sendUnicast = function ($payload) use ($ip) {
+            $this->socket->send($payload, $ip . ':' . static::SERVER_PORT);
+        };
+
+        $gateway = new Gateway($response->toArray());
+        $gateway->ip = $ip;
+        $gateway->on(
+            'offline',
+            function () use ($sid) {
+                unset($this->gatewayList[$sid]);
+            }
+        );
+        $this->gatewayList[$sid] = $gateway;
+        $this->emit('gateway', [$gateway]);
+    }
+
+    public function resetReceiver()
+    {
+        $this->close();
+        $this->initReceiver();
     }
 
     public function run()
@@ -145,9 +187,11 @@ class Aqara extends EventEmitter
 
     public function tick()
     {
-        $this->loop->futureTick(function () {
-            $this->loop->stop();
-        });
+        $this->loop->futureTick(
+            function () {
+                $this->loop->stop();
+            }
+        );
         $this->loop->run();
     }
 
@@ -161,6 +205,8 @@ class Aqara extends EventEmitter
 
     public function close()
     {
-        $this->socket->close();
+        if ($this->socket instanceof Socket) {
+            $this->socket->close();
+        }
     }
 }

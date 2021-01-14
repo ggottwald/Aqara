@@ -184,9 +184,9 @@ abstract class DataModel implements \ArrayAccess, \JsonSerializable, \Iterator, 
      * @param int $options
      * @return string
      */
-    public function toJson($options = 0)
+    public function toJson($options = JSON_FORCE_OBJECT)
     {
-        return json_encode($this->toArray(), JSON_FORCE_OBJECT);
+        return json_encode($this->toArray(), $options);
     }
 
     /**

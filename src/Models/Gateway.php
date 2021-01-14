@@ -10,13 +10,13 @@ use Evenement\EventEmitterTrait;
  *
  * @package Aqara\Models
  *
- * @property string      $ip
- * @property int         $port
- * @property bool        $ready
- * @property string      $rgb
- * @property string      $brightness
+ * @property string $ip
+ * @property int $port
+ * @property bool $ready
+ * @property string $rgb
+ * @property string $brightness
  * @property Subdevice[] $subDevices
- * @property \Closure    $sendUnicast
+ * @property \Closure $sendUnicast
  *
  * @method sendUnicast(string $payload)
  */
@@ -51,7 +51,7 @@ class Gateway extends Response implements EventEmitterInterface
                 $state = @json_decode($response->data, true);
 
                 if (!is_array($state)) {
-                    break;
+                    return false;
                 }
 
                 foreach ($state as $sid) {
@@ -67,98 +67,11 @@ class Gateway extends Response implements EventEmitterInterface
                     $this->handleState($state);
                     $this->ready = true;
                     $this->emit('ready');
-                } else {
-                    switch ($response->model) {
-                        case 'magnet':
-                        case 'sensor_magnet.aq2':
-                            $subDevice = new Magnet(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        case 'switch':
-                        case 'sensor_switch.aq2':
-                        case '86sw1':
-                        case '86sw2':
-                        case 'remote.b1acn01';
-                        case 'remote.b186acn01':
-                        case 'remote.b286acn01':
-                            $subDevice = new SwitchDevice(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        case 'motion':
-                        case 'sensor_motion.aq2':
-                            $subDevice = new Motion(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        case 'sensor_ht':
-                        case 'weather.v1':
-                            $subDevice = new Sensor(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        case 'sensor_wleak.aq1':
-                            $subDevice = new Leak(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        case 'cube':
-                            $subDevice = new Cube(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        case 'smoke':
-                            $subDevice = new Smoke(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            );
-                            break;
-                        default:
-                            $subDevice = new Class(
-                                [
-                                    'sid'   => $response->sid,
-                                    'model' => $response->model,
-                                ]
-                            ) extends Subdevice
-                            {
-                                public function __construct(array $attributes = [])
-                                {
-                                    $this->type = 'unknown';
-                                    parent::__construct($attributes);
-                                }
-                            };
-                    }
-
-                    if (isset($subDevice)) {
-                        $subDevice->handleState($state);
-                        $subDevices                 = $this->subDevices;
-                        $subDevices[$response->sid] = $subDevice;
-                        $this->subDevices           = $subDevices;
-                        $this->emit('subdevice', [$subDevice]);
-                    }
+                    return true;
                 }
-                break;
+
+                $this->registerSubDevice($response);
+                return $this->handleSubDeviceState($response->sid, $state);
             case 'heartbeat':
                 if ($response->sid == $this->sid) {
                     $this->emit('heartbeat');
@@ -168,21 +81,137 @@ class Gateway extends Response implements EventEmitterInterface
                 $state = @json_decode($response->data, true);
                 if ($response->sid == $this->sid) {
                     $this->handleState($state);
-                } else {
-                    if (!is_array($state)) {
-                        break;
-                    }
-
-                    $subDevices = $this->subDevices;
-                    if (isset($subDevices[$response->sid])) {
-                        $subDevice = $subDevices[$response->sid];
-                        $subDevice->handleState($state);
-                    }
+                    return true;
                 }
 
-                break;
+                $this->registerSubDevice($response);
+                return $this->handleSubDeviceState($response->sid, $state);
         }
 
+        return true;
+    }
+
+    /**
+     * @param Response $response
+     */
+    protected function registerSubDevice($response)
+    {
+        if (empty($response->sid)) {
+            return;
+        }
+
+        if (isset($this->subDevices[$response->sid])) {
+            return;
+        }
+
+        switch ($response->model) {
+            case 'magnet':
+            case 'sensor_magnet.aq2':
+                $subDevice = new Magnet(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            case 'switch':
+            case 'sensor_switch.aq2':
+            case '86sw1':
+            case '86sw2':
+            case 'remote.b1acn01';
+            case 'remote.b186acn01':
+            case 'remote.b286acn01':
+                $subDevice = new SwitchDevice(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            case 'motion':
+            case 'sensor_motion.aq2':
+                $subDevice = new Motion(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            case 'sensor_ht':
+            case 'weather.v1':
+                $subDevice = new Sensor(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            case 'sensor_wleak.aq1':
+                $subDevice = new Leak(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            case 'cube':
+                $subDevice = new Cube(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            case 'smoke':
+                $subDevice = new Smoke(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                );
+                break;
+            default:
+                $subDevice = new class(
+                    [
+                        'sid' => $response->sid,
+                        'model' => $response->model,
+                    ]
+                ) extends Subdevice {
+                    public function __construct(array $attributes = [])
+                    {
+                        $this->type = 'unknown';
+                        parent::__construct($attributes);
+                    }
+                };
+        }
+
+        if (isset($subDevice)) {
+            $subDevices = $this->subDevices;
+            $subDevices[$response->sid] = $subDevice;
+            $this->subDevices = $subDevices;
+            $this->emit('subdevice', [$subDevice]);
+        }
+    }
+
+    /**
+     * @param string $sid
+     * @param array $state
+     * @return bool
+     */
+    protected function handleSubDeviceState($sid, $state)
+    {
+        if (empty($sid)) {
+            return false;
+        }
+
+        if (!is_array($state)) {
+            return false;
+        }
+
+        if (isset($this->subDevices[$sid])) {
+            $subDevice = $this->subDevices[$sid];
+            $subDevice->handleState($state);
+        }
         return true;
     }
 
@@ -197,7 +226,7 @@ class Gateway extends Response implements EventEmitterInterface
 
             if (strlen($hexValue) >= 7) {
                 $this->brightness = strrev(substr(strrev($hexValue), 6));
-                $this->rgb        = strrev(substr(strrev($hexValue), 0, 6));
+                $this->rgb = strrev(substr(strrev($hexValue), 0, 6));
                 $this->emit('lightState', ['rgb' => $this->rgb, 'brightness' => $this->brightness]);
             }
         }
